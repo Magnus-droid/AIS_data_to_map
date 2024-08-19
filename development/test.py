@@ -1,6 +1,6 @@
 import requests
 import json
-
+import folium
 
 
 def get_new_access_token():
@@ -38,21 +38,25 @@ def check_access_token(access_token):
 bearer_access_token = '' 
 
 
-for i in range(2):
 
-	check_access_token(bearer_access_token)
+check_access_token(bearer_access_token)
 
-	url = 'https://live.ais.barentswatch.no/v1/latest/combined'
+url = 'https://live.ais.barentswatch.no/v1/latest/combined'
 
-	headers = {
-		'Authorization':f'Bearer {bearer_access_token}',
-		'Content-Type':'application/json'
-	}
+headers = {
+	'Authorization':f'Bearer {bearer_access_token}',
+	'Content-Type':'application/json'
+}
 
-	all_ship_data = requests.get(url, headers=headers)	
-	print(all_ship_data.status_code)
-	ship_list = json.loads(all_ship_data.text)
-
-	relevant = [ship for ship in ship_list if ship['mmsi'] == 258219000]
-	print(relevant)
+all_ship_data = requests.get(url, headers=headers)	
+print(all_ship_data.status_code)
+ship_list = json.loads(all_ship_data.text)
+relevant = [ship for ship in ship_list if ship['mmsi'] == 258219000]
+#print(relevant)
+latitude = relevant[0].get('latitude')
+longitude = relevant[0].get('longitude')
+name = relevant[0].get('name')
+m = folium.Map(location=[latitude, longitude], zoom_start = 12)
+folium.Marker([latitude, longitude], popup=name).add_to(m)
+m.save("testmap.html")
 
